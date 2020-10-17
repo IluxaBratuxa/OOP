@@ -6,6 +6,33 @@ using System.Threading.Tasks;
 
 namespace Lab_5
 {
+    enum CarColor
+    {
+        White = 1,
+        Black,
+        Green,
+        DarkBlue
+    }
+
+    struct Driver
+    {
+        string name;
+        int age;
+        string hometown;
+
+        Driver(string name, int age, string hometown)
+        {
+            this.name = name;
+            this.age = age;
+            this.hometown = hometown;
+        }
+
+        void PrintDriver()
+        {
+            Console.WriteLine("Информация о водителе:");
+            Console.WriteLine($"Имя:{name} \nВозраст:{age} \nГород: {hometown}");
+        }
+    }
     class Print
     {
         public virtual void IamPrinting(Engine obj)
@@ -42,16 +69,13 @@ namespace Lab_5
             countryOfOrigin = country;
             costOfObject = cost;
         }
-
-        //public void Print()
-        //{
-        //    Console.WriteLine($"Страна производитель:{countryOfOrigin} \nСтоимость:{costOfObject}");
-        //}
+        public Vehicle() { }
+        
         public override string ToString()
         {
-            return $"Тип объекта: {this.GetType()}\n" +
-                $"Страна производитель:{this.countryOfOrigin}\n" +
-                $"Стоимость:{this.CostOfObject}\n";
+            return $"Страна производитель:{this.countryOfOrigin}\n" +
+                $"Стоимость:{this.CostOfObject}\n" + 
+                $"Тип объекта: {this.GetType()}\n";
 
         }
 
@@ -84,18 +108,17 @@ namespace Lab_5
         {
             powerOfEngine = power;
         }
+        public Engine() { }
         public override string ToString()
         {
-            return $"Тип объекта: {this.GetType()}\n" + 
-                $"Мощность двигателя: {this.PowerOfEngine}\n" +
-                $"Страна производитель:{this.countryOfOrigin}\n" +
-                $"Стоимость:{this.CostOfObject}\n";
+            return $"Мощность двигателя: {this.PowerOfEngine}\n" + base.ToString();
+
 
         }
 
     }
 
-    class Car : Engine
+    sealed class Car : Engine
     {
         public string carBrand { get; set; }
         private string transmissionType;
@@ -113,12 +136,29 @@ namespace Lab_5
                     transmissionType = "No information";
             }
         }
-
-        public Car(string brand, string transmission, long power, long cost, string country) : base(power, country, cost)
+        private int gasExpense;
+        public int GasExpense
+        {
+            get
+            {
+                return gasExpense;
+            }
+            set
+            {
+                if (value < 1)
+                    gasExpense = 0;
+                else
+                    gasExpense = value;
+            }
+        }
+        
+        public Car(string brand, string transmission, int gas, long power, long cost, string country) : base(power, country, cost)
         {
             carBrand = brand;
             transmissionType = transmission;
+            gasExpense = gas;
         }
+        public Car() { }
 
         public override void GenerateWIN()
         {
@@ -129,7 +169,7 @@ namespace Lab_5
         }
         public override int GetHashCode()
         {
-            return carBrand.GetHashCode() + transmissionType.GetHashCode() + WIN.GetHashCode() + PowerOfEngine.GetHashCode();
+            return carBrand.GetHashCode() + transmissionType.GetHashCode() + PowerOfEngine.GetHashCode();
         }
 
         public override bool Equals(object obj)
@@ -142,14 +182,11 @@ namespace Lab_5
 
         public override string ToString()
         {
-            return $"Тип объекта: {this.GetType()}\n" +
-                $"Страна производитель:{this.countryOfOrigin}\n" +
+            return
                 $"Марка автомобиля: {this.carBrand}\n" +
                 $"Трансмиссия: {this.transmissionType}\n" +
-                $"Мощность двигателя: {this.PowerOfEngine}\n" +
-                //$"WIN номер: {this.WIN}\n" +
-                $"Стоимость:{this.CostOfObject}\n";
-                
+                $"Расход топлива: {this.gasExpense}\n" + base.ToString();
+
         }
     }
 
@@ -220,7 +257,7 @@ namespace Lab_5
         }
     }
 
-    sealed class Train : Carriage
+    partial class Train : Carriage
     {
         public string route { get; set; }
         private int numberOfTickets;
@@ -244,72 +281,133 @@ namespace Lab_5
             route = routeName;
         }
        
-        public void AllRouteCost()
-        {
-            Console.WriteLine("Стоимость всего маршрута: " + this.CostOfObject * this.NumberOfTickets);
-        }
         
-        public override string ToString()
-        {
-            return $"Тип объекта: {this.GetType()}\n" +
-                $"Страна производитель:{this.countryOfOrigin}\n" +
-                $"Компания: {this.companyType}\n" +
-                $"Тип вагона: {this.CarriageClass}\n" +
-                $"Количество вагонов:{this.AmountOfCarriages}\n" +
-                $"Маршрут: {this.route}\n"+
-                $"Количество билетов: {this.numberOfTickets}\n" +
-                $"Стоимость билета: {this.CostOfObject}\n";
-        }
 
     }
 
+    class TransportAgency
+    {
+        public List<Car> carList { get; set; }
+        public TransportAgency()
+        {
+            carList = new List<Car>();
+        }
+        public void Print()
+        {
+            Console.WriteLine("\nСписок автомобилей агенства:\n");
+            foreach (var i in carList)
+            {
+                Console.WriteLine(i);
+            }
+        }
+        
+
+    }
+
+    class TransportController : IComparer<Car>
+    {
+        public long GeneralCost(TransportAgency TA)
+        {
+            long sum = 0;
+            foreach(var i in TA.carList)
+            {
+                sum += i.CostOfObject;
+            }
+            return sum;
+        }
+
+        public int Compare(Car list1, Car list2)
+        {
+            if(list1.GasExpense > list2.GasExpense)
+            {
+                return 1;
+            }
+            else if(list1.GasExpense < list2.GasExpense)
+            {
+                return -1;
+            }
+
+            return 0;
+        }
+
+        public void Power(TransportAgency TA, int[] power)
+        {
+            int count = 0;
+            for(int i = 0; i< TA.carList.Count;i++)
+            {
+                if(TA.carList[i].PowerOfEngine >= power[0] && TA.carList[i].PowerOfEngine <= power[1])
+                {
+                    Console.WriteLine(TA.carList[i]);
+                    count++;
+                }
+            }
+            if (count == 0)
+                Console.WriteLine("В данном диапазоне ничего не найдено");
+        }
+    }
 
     class Program
     {
         static void Main(string[] args)
         {
-            Car car = new Car("Mercedes", "АКП", 125, 12000, "Germany");
-            Console.WriteLine(car.ToString());
-            Car car2 = new Car("AUDI", "МКП", 300, 20000, "Germany");
-            Console.WriteLine(car2.ToString());
+            Car car = new Car("Mercedes", "АКП",10, 125, 12000, "Germany");
+            Car car2 = new Car("AUDI", "МКП", 15,300, 20000, "Germany");
             car2.GenerateWIN();
-            Console.WriteLine($"WIN номер: {car2.WIN}");
-            bool eq = car.Equals(car2);
-            Console.WriteLine("\n" + eq + "\n");
-            
-            Train train = new Train("Belarussian railway", "Belarus", 100, 10, "Бизнесс", 200, "Брест-Витебск");
-            Console.WriteLine(train.ToString());
-            train.AllRouteCost();
-            Carriage newCarr = new Carriage("RR", "Russia", 1000, 25, "Бизнесс");
-            Console.WriteLine("\n" + newCarr.ToString());
-            Train tr = newCarr as Train;
-            if(tr == null)
-                Console.WriteLine("\nПреобразование не удалось\n");
-            else
-                Console.WriteLine(tr.ToString());
+            TransportController control = new TransportController();
+            TransportAgency TA1 = new TransportAgency();
+            TA1.carList.Add(car);
+            TA1.carList.Add(car2);
+            TA1.carList.Add(new Car("BMW", "МКП", 22, 201, 21100, "Germany"));
+            TA1.carList.Sort(control);
+            TA1.Print();
+            Console.WriteLine($"Общая стоимость всех автомобилей: {control.GeneralCost(TA1)}");
+            int[] powerArray = new int[2];
+            Console.WriteLine("Введите диапазон мощности автомобиля: ");
+            Console.WriteLine("Первая точка диапазона: ");
+            powerArray[0] = Convert.ToInt32(Console.ReadLine());
+            Console.WriteLine("Вторая точка диапазона: ");
+            powerArray[1] = Convert.ToInt32(Console.ReadLine());
+            if(powerArray[0]>powerArray[1])
+                throw new Exception("Первая точка диапазона не может быть больше второй");
 
-            newCarr = train as Carriage;
-            if (newCarr == null)
-                Console.WriteLine("\nПреобразование не удалось\n");
-            else
-            {
-                Console.WriteLine("Результат преобразования: ");
-                Console.WriteLine(newCarr.ToString());
-            }
+            control.Power(TA1, powerArray);
 
-            Engine[] veh = new Engine[3];
-            Engine eng = car2 as Car;
-            veh[0] = eng;
-            veh[1] = car;
-            veh[2] = car2;
-           
+            //bool eq = car.Equals(car2);
+            //Console.WriteLine("\n" + eq + "\n");
 
-            Print print = new Print();
-            for(int i = 0; i<veh.Length;i++)
-            {
-                print.IamPrinting(veh[i]);
-            }
-           
+            //Train train = new Train("Belarussian railway", "Belarus", 100, 10, "Бизнесс", 200, "Брест-Витебск");
+            //Console.WriteLine(train.ToString());
+            //train.AllRouteCost();
+            //Carriage newCarr = new Carriage("RR", "Russia", 1000, 25, "Бизнесс");
+            //Console.WriteLine("\n" + newCarr.ToString());
+            //Train tr = newCarr as Train;
+            //if(tr == null)
+            //    Console.WriteLine("\nПреобразование не удалось\n");
+            //else
+            //    Console.WriteLine(tr.ToString());
+
+            //newCarr = train as Carriage;
+            //if (newCarr == null)
+            //    Console.WriteLine("\nПреобразование не удалось\n");
+            //else
+            //{
+            //    Console.WriteLine("Результат преобразования: ");
+            //    Console.WriteLine(newCarr.ToString());
+            //}
+
+            //Engine[] veh = new Engine[3];
+            //Engine eng = car2 as Car;
+            //veh[0] = eng;
+            //veh[1] = car;
+            //veh[2] = car2;
+
+
+            //Print print = new Print();
+            //for(int i = 0; i<veh.Length;i++)
+            //{
+            //    print.IamPrinting(veh[i]);
+            //}
+
 
 
         }
