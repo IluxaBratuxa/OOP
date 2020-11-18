@@ -1,123 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace Lab_5
 {
-    enum CarColor
-    {
-        White = 1,
-        Black,
-        Green,
-        DarkBlue
-    }
-
-    struct Driver
-    {
-        string name;
-        int age;
-        string hometown;
-
-        Driver(string name, int age, string hometown)
-        {
-            this.name = name;
-            this.age = age;
-            this.hometown = hometown;
-        }
-
-        void PrintDriver()
-        {
-            Console.WriteLine("Информация о водителе:");
-            Console.WriteLine($"Имя:{name} \nВозраст:{age} \nГород: {hometown}");
-        }
-    }
-    class Print
-    {
-        public virtual void IamPrinting(Engine obj)
-        {
-            Console.WriteLine(obj.ToString());
-        }
-    }
-    interface IWIN
-    {
-        long WIN { get; set; }
-        void GenerateWIN();
-    }
-    class Vehicle
-    {
-        public string countryOfOrigin { get; set; }
-        private long costOfObject;
-        public long CostOfObject
-        {
-            get
-            {
-                return costOfObject;
-            }
-            set
-            {
-                if (value < 1)
-                    costOfObject = 0;
-                else
-                    costOfObject = value;
-            }
-        }
-
-        public Vehicle(long cost, string country)
-        {
-            countryOfOrigin = country;
-            costOfObject = cost;
-        }
-        public Vehicle() { }
-        
-        public override string ToString()
-        {
-            return $"Страна производитель:{this.countryOfOrigin}\n" +
-                $"Стоимость:{this.CostOfObject}\n" + 
-                $"Тип объекта: {this.GetType()}\n";
-
-        }
-
-
-    }
-    abstract class Engine : Vehicle,IWIN
-    {
-        private long powerOfEngine;
-        public long PowerOfEngine
-        {
-            get
-            {
-                return powerOfEngine;
-            }
-            set
-            {
-                if (value < 1)
-                    powerOfEngine = 1;
-                else
-                    powerOfEngine = value;
-            }
-        }
-        public long WIN { get; set; }
-        public virtual void GenerateWIN()
-        {
-            WIN = (powerOfEngine * 101) / 2;
-        }
-
-        public Engine(long power, string country, long cost) : base(cost, country)
-        {
-            powerOfEngine = power;
-        }
-        public Engine() { }
-        public override string ToString()
-        {
-            return $"Мощность двигателя: {this.PowerOfEngine}\n" + base.ToString();
-
-
-        }
-
-    }
-
+    
     sealed class Car : Engine
     {
         public string carBrand { get; set; }
@@ -130,10 +20,10 @@ namespace Lab_5
             }
             set
             {
-                if (value == "АКП" || value == "МКП")
+                if (value == "АКПП" || value == "МКПП")
                     transmissionType = value;
                 else
-                    transmissionType = "No information";
+                    throw new TransmissionTypeException(value, "Такой коробки передач не существует");
             }
         }
         private int gasExpense;
@@ -146,7 +36,7 @@ namespace Lab_5
             set
             {
                 if (value < 1)
-                    gasExpense = 0;
+                    throw new IntTypeException(value, "Расход топлива не может быть меньше 1");
                 else
                     gasExpense = value;
             }
@@ -154,9 +44,12 @@ namespace Lab_5
         
         public Car(string brand, string transmission, int gas, long power, long cost, string country) : base(power, country, cost)
         {
-            carBrand = brand;
-            transmissionType = transmission;
-            gasExpense = gas;
+            if (brand == null)
+                throw new BrandTypeException("Значение марки автомобиля не может быть пустым");
+            else
+                carBrand = brand;
+            TransmissionType = transmission;
+            GasExpense = gas;
         }
         public Car() { }
 
@@ -190,100 +83,7 @@ namespace Lab_5
         }
     }
 
-    class Express : Vehicle
-    {
-        public string companyType { get; set; }
-        public Express(string company, string country, int cost) : base(cost, country)
-        {
-            companyType = company;
-        }
-        public override string ToString()
-        {
-            return $"Тип объекта: {this.GetType()}\n" +
-                $"Страна производитель:{this.countryOfOrigin}\n" +
-                $"Компания: {this.companyType}\n" +
-                $"Стоимость:{this.CostOfObject}\n";
-
-        }
-    }
-
-    class Carriage : Express
-    {
-        private string carriageClass;
-        public string CarriageClass
-        {
-            get
-            {
-                return carriageClass;
-            }
-            set
-            {
-                if (value == "Бизнесс" || value == "Эконом")
-                    carriageClass = value;
-                else
-                    carriageClass = "No information";
-            }
-        }
-
-        private int amountOfCarriages;
-        public int AmountOfCarriages
-        {
-            get
-            {
-                return amountOfCarriages;
-            }
-            set
-            {
-                if (value < 0)
-                    amountOfCarriages = 0;
-                else
-                    amountOfCarriages = value;
-            }
-        }
-        public Carriage(string company, string country, int cost, int amount, string type) : base(company, country, cost)
-        {
-            amountOfCarriages = amount;
-            carriageClass = type;
-        }
-        public override string ToString()
-        {
-            return $"Тип объекта: {this.GetType()}\n" +
-                $"Страна производитель:{this.countryOfOrigin}\n" +
-                $"Компания: {this.companyType}\n" +
-                $"Тип вагона: {this.carriageClass}\n " +
-                $"Количество вагонов:{this.amountOfCarriages}\n " +
-                $"Стоимость:{this.CostOfObject}\n";
-            
-        }
-    }
-
-    partial class Train : Carriage
-    {
-        public string route { get; set; }
-        private int numberOfTickets;
-        public int NumberOfTickets
-        {
-            get
-            {
-                return numberOfTickets;
-            }
-            set
-            {
-                if (value < 0)
-                    numberOfTickets = 0;
-                else
-                    numberOfTickets = value;
-            }
-        }
-        public Train(string company, string country, int cost, int amount, string type, int tickets, string routeName) : base(company, country, cost,amount,type)
-        {
-            numberOfTickets = tickets;
-            route = routeName;
-        }
-       
-        
-
-    }
+    
 
     class TransportAgency
     {
@@ -346,32 +146,155 @@ namespace Lab_5
         }
     }
 
+    
+
     class Program
     {
         static void Main(string[] args)
         {
-            Car car = new Car("Mercedes", "АКП",10, 125, 12000, "Germany");
-            Car car2 = new Car("AUDI", "МКП", 15,300, 20000, "Germany");
-            car2.GenerateWIN();
-            TransportController control = new TransportController();
-            TransportAgency TA1 = new TransportAgency();
-            TA1.carList.Add(car);
-            TA1.carList.Add(car2);
-            TA1.carList.Add(new Car("BMW", "МКП", 22, 201, 21100, "Germany"));
-            TA1.carList.Sort(control);
-            TA1.Print();
-            Console.WriteLine($"Общая стоимость всех автомобилей: {control.GeneralCost(TA1)}");
-            int[] powerArray = new int[2];
-            Console.WriteLine("Введите диапазон мощности автомобиля: ");
-            Console.WriteLine("Первая точка диапазона: ");
-            powerArray[0] = Convert.ToInt32(Console.ReadLine());
-            Console.WriteLine("Вторая точка диапазона: ");
-            powerArray[1] = Convert.ToInt32(Console.ReadLine());
-            if(powerArray[0]>powerArray[1])
-                throw new Exception("Первая точка диапазона не может быть больше второй");
+            try
+            {
+                try
+                {
+                    Car carTry1 = new Car("Mercedes", "АКrП", 10, 125, 12000, "Germany");
+                }
+                catch (TransmissionTypeException ex)
+                {
+                    Console.WriteLine("Было сгенерировано исключение: " + ex.Message + "\n");
+                    Console.WriteLine("Метод: " + ex.TargetSite + "\n");
+                    Console.WriteLine("Место: " + ex.StackTrace + "\n");
+                }
+                finally
+                {
+                    Console.WriteLine("Трансмиссия проверена\n");
+                    Console.WriteLine("-----------------------------------------\n");
+                }
 
-            control.Power(TA1, powerArray);
+                try
+                {
+                    Car carTry2 = new Car("Mercedes", "АКПП", -2, 200, 12000, "Germany");
+                }
+                catch (IntTypeException ex)
+                {
+                    Console.WriteLine("Было сгенерировано исключение: " + ex.Message + "\n");
+                    Console.WriteLine("Метод: " + ex.TargetSite + "\n");
+                    Console.WriteLine("Место: " + ex.StackTrace + "\n");
+                }
+                finally
+                {
+                    Console.WriteLine("Расход топлива проверен\n");
+                    Console.WriteLine("-----------------------------------------\n");
+                }
 
+                try
+                {
+                    Car carTry2 = new Car(null, "АКПП", 3, 200, 12000, "Germany");
+                }
+                catch (BrandTypeException ex)
+                {
+                    Console.WriteLine("Было сгенерировано исключение: " + ex.Message + "\n");
+                    Console.WriteLine("Метод: " + ex.TargetSite + "\n");
+                    Console.WriteLine("Место: " + ex.StackTrace + "\n");
+                }
+                finally
+                {
+                    Console.WriteLine("Марка автомобиля проверена\n");
+                    Console.WriteLine("-----------------------------------------\n");
+                }
+
+                try
+                {
+                    Train train = new Train();
+                    train.arr[5] = 5;
+                }
+                catch (IndexOutOfRangeException ex)
+                {
+                    Console.WriteLine("Было сгенерировано исключение: " + ex.Message + "\n");
+                    Console.WriteLine("Метод: " + ex.TargetSite + "\n");
+                    Console.WriteLine("Место: " + ex.StackTrace + "\n");
+                }
+                finally
+                {
+                    Console.WriteLine("Массив проверен\n");
+                    Console.WriteLine("-----------------------------------------\n");
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Было сгенерировано исключение: " + ex.Message + "\n");
+                Console.WriteLine("Метод: " + ex.TargetSite + "\n");
+                Console.WriteLine("Место: " + ex.StackTrace + "\n");
+            }
+            finally
+            {
+                Console.WriteLine("\nПроверка закончена\n");
+                Console.WriteLine("-----------------------------------------\n");
+
+            }
+            //assert(bool pram, string message)Проверяет условие. 
+            //Если условие имеет значение false, выдается указанное сообщение и отображается окно сообщения со стеком вызовов.
+            //int[] aa = null;
+            //Debug.Assert(aa != null, "Values array cannot be null");
+            Logger person = new Logger();
+
+            try
+            {
+                person.Login = "Andrejе";
+                person.Password = "Andrej13";
+                string Info = "Время: " + Convert.ToString(DateTime.Now) + "\nЛогин: " + person.Login + "\nПароль: " + person.Password + "\nАвторизация пройдена успешно";
+                person.ConsoleLogger(Info);
+                person.FileLogger(Info);
+            }
+            catch (LoggerException ex)
+            {
+                string Info = "Время: " + Convert.ToString(DateTime.Now) + "\nИсключение: " + ex.Message + "\nМетод: " + ex.TargetSite + "\nМесто: " + ex.StackTrace;
+                person.ConsoleLogger(Info);
+                person.FileLogger(Info);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+            finally
+            {
+                Console.WriteLine("\nПроверка авторизации завершена\n");
+            }
+
+
+
+            ///////////////////////////////////////////
+            //                  Lab_5
+            ///////////////////////////////////////////
+
+            //Car car = new Car("Mercedes", "АКПП", 10, 125, 12000, "Germany");
+            //Car car2 = new Car("AUDI", "МКПП", 15, 300, 20000, "Germany");
+            //car2.GenerateWIN();
+            //TransportController control = new TransportController();
+            //TransportAgency TA1 = new TransportAgency();
+            //TA1.carList.Add(car);
+            //TA1.carList.Add(car2);
+            //TA1.carList.Add(new Car("BMW", "МКПП", 22, 201, 21100, "Germany"));
+            //TA1.carList.Sort(control);
+            //TA1.Print();
+            //Console.WriteLine($"Общая стоимость всех автомобилей: {control.GeneralCost(TA1)}");
+            //int[] powerArray = new int[2];
+            //Console.WriteLine("Введите диапазон мощности автомобиля: ");
+            //Console.WriteLine("Первая точка диапазона: ");
+            //powerArray[0] = Convert.ToInt32(Console.ReadLine());
+            //Console.WriteLine("Вторая точка диапазона: ");
+            //powerArray[1] = Convert.ToInt32(Console.ReadLine());
+            //if (powerArray[0] > powerArray[1])
+            //    throw new Exception("Первая точка диапазона не может быть больше второй");
+
+            //control.Power(TA1, powerArray);
+
+
+
+
+
+            ///////////////////////////////////////////
+            //                  Lab_4
+            ///////////////////////////////////////////
             //bool eq = car.Equals(car2);
             //Console.WriteLine("\n" + eq + "\n");
 

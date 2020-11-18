@@ -43,7 +43,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Class1.cs" />
+    <Compile Include="Enum+Struct.cs" />
+    <Compile Include="Partial.cs" />
+    <Compile Include="Logger.cs" />
+    <Compile Include="Classes_Lab_4.cs" />
+    <Compile Include="ExceptionClasses.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
